@@ -6,7 +6,7 @@ a version of cond that supports a for/cond-clause form, allowing it to iterate t
 my-cond is like cond, but with the ability to use things like for/cond-clause to iterate through
 cond-clauses like for would.
 my-cond also allows easy internal definitions with things like #:defs [def ...] and
-#:let ([var val] ...).
+ #:let ([var val] ...).
 
 As soon as one of the conditions evaluates to a true value, it returns whatever cond
 would return as the result of that clause.
@@ -14,7 +14,7 @@ would return as the result of that clause.
 Otherwise, it goes on to the next clause, if there is one.
 
 If it reaches the end of a my-cond expression where none of the conditions returned a
-true value, the my-cond expression returns #<void>.
+true value, the my-cond expression returns void.
 
 If it reaches the end of a for/cond-clause or for*/cond-clause form, then it goes
 through the for/cond-clause form again for the next iteration (if there is one).
