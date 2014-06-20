@@ -26,6 +26,7 @@ An else clause can only appear as the last clause of a my-cond (or cond) form, a
 cannot appear inside of a for/cond-clause or for*/cond-clause form.
 
 Examples:
+
     > (require my-cond)
     > (my-cond (for/cond-clause ([i (in-range 0 5)])
                  [(<= 3 i) i]
