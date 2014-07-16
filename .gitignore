@@ -2,3 +2,9 @@
 *.rkt~
 
 *.scrbl~
+
+*.html
+
+*.css
+
+*.js
