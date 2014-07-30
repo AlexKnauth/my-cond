@@ -14,13 +14,7 @@
 (module+ test
   (require typed/rackunit))
 
-(define-syntax for/cond-clause
-  (lambda (stx)
-    (raise-syntax-error #f "must be used as a cond clause of a my-cond form" stx)))
-
-(define-syntax for*/cond-clause
-  (lambda (stx)
-    (raise-syntax-error #f "must be used as a cond clause of a my-cond form" stx)))
+(require (only-in my-cond/main for/cond-clause for*/cond-clause))
 
 (define-syntax define-gensym-type
   (lambda (stx)
