@@ -17,6 +17,7 @@
                                     for*/cond-clause-form
                                     (code:line #:defs [def ...])
                                     (code:line #:let ([var val] ...))
+                                    (code:line #:begin [def-or-expr ...])
                                     ]
                     [normal-cond-clause [condition-expr then-body ...+]
                                         [else then-body ...+]

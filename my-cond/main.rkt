@@ -32,6 +32,8 @@
        (syntax/loc stx (local [def ...] (my-cond clause ...)))]
       [(my-cond #:let ~! ([var val] ...) clause ...)
        (syntax/loc stx (let ([var val] ...) (my-cond clause ...)))]
+      [(my-cond #:begin [expr:expr ...] clause ...)
+       (syntax/loc stx (begin expr ... (my-cond clause ...)))]
       [(my-cond (for/cond-clause ~! (for-clause ...) looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
