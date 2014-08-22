@@ -11,7 +11,8 @@
 
 @defmodule[my-cond]
 
-@defform[(my-cond my-cond-clause ...)
+@defform[#:literals (else => for/cond-clause for*/cond-clause)
+         (my-cond my-cond-clause ...)
          #:grammar ([my-cond-clause normal-cond-clause
                                     for/cond-clause-form
                                     for*/cond-clause-form
@@ -63,3 +64,9 @@ form, and cannot appear inside of a @racket[for/cond-clause] or @racket[for*/con
              [(<= 2 i) i]
              [(<= 3 i) (number->string i)]))
 ]}
+
+@deftogether[[@defform[(for/cond-clause (for-clause ...) my-cond-clause ...)]
+              @defform[(for*/cond-clause (for-clause ...) my-cond-clause ...)]]]{
+these can only be used inside a @racket[my-cond] form, and they raise a syntax error when used outside
+of a @racket[my-cond] form.  
+}

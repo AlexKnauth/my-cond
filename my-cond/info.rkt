@@ -1,3 +1,4 @@
 #lang info
 
-(define scribblings '(["docs/docs.scrbl" ()]))
+(define scribblings '(["docs/my-cond.scrbl" ()]))
+
