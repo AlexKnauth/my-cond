@@ -1,15 +1,15 @@
 #lang scribble/manual
 
-@(require scribble/eval
-          my-cond)
+@(require scribble/eval)
 
 @(require (for-label racket/base
-                     racket/local
                      my-cond))
 
 @title{my-cond}
 
 @defmodule[my-cond]
+
+source code: @url["https://github.com/AlexKnauth/my-cond"]
 
 @defform[#:literals (else => for/cond-clause for*/cond-clause)
          (my-cond my-cond-clause ...)

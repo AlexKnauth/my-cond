@@ -5,6 +5,8 @@ a version of cond that supports a for/cond-clause form, allowing it to iterate t
 
 [![Build Status](https://travis-ci.org/AlexKnauth/my-cond.png?branch=master)](https://travis-ci.org/AlexKnauth/my-cond)
 
+documentation: http://pkg-build.racket-lang.org/doc/my-cond/index.html
+
 my-cond is like cond, but with the ability to use things like for/cond-clause to iterate through
 cond-clauses like for would.
 my-cond also allows easy internal definitions with things like #:defs [def ...] and
