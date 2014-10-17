@@ -36,8 +36,12 @@
        (syntax/loc stx (let stuff (my-cond clause ...)))]
       [(my-cond #:begin [expr:expr ...] clause ...)
        (syntax/loc stx (begin expr ... (my-cond clause ...)))]
-      [(my-cond (for/cond-clause ~! (~optional (~seq : type) #:defaults ([type #'Any]))
-                  (for-clause ...) looped-cond-clause ...)
+      [(my-cond (for/cond-clause ~!
+                  (~or (~seq (for-clause ...)
+                             (~optional (~seq : type) #:defaults ([type #'Any])))
+                       (~seq (~optional (~seq : type) #:defaults ([type #'Any]))
+                             (for-clause ...)))
+                  looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
          (call/cc
@@ -51,8 +55,12 @@
                   (return (ann maybe-result type))
                   #f))
             (my-cond clause ...))))]
-      [(my-cond (for*/cond-clause ~! (~optional (~seq : type) #:defaults ([type #'Any]))
-                  (for-clause ...) looped-cond-clause ...)
+      [(my-cond (for*/cond-clause ~!
+                  (~or (~seq (for-clause ...)
+                             (~optional (~seq : type) #:defaults ([type #'Any])))
+                       (~seq (~optional (~seq : type) #:defaults ([type #'Any]))
+                             (for-clause ...)))
+                  looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
          (call/cc
