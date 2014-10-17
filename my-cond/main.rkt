@@ -21,6 +21,9 @@
   (lambda (stx)
     (raise-syntax-error #f "must be used as a cond clause of a my-cond form" stx)))
 
+(define failure-sym
+  (gensym 'failure))
+
 (define-syntax my-cond
   (lambda (stx)
     (syntax-parse stx #:literals (for/cond-clause for*/cond-clause else)
@@ -37,37 +40,27 @@
       [(my-cond (for/cond-clause ~! (for-clause ...) looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
-         (local [(struct success (val))
-                 (struct failure ())
-                 (define maybe-success
-                   (for/or (for-clause ...)
-                     (let ([maybe-result
-                            (my-cond looped-cond-clause ...
-                                     [else (failure)])])
-                       (if (not (failure? maybe-result))
-                           (success maybe-result)
-                           #f))))]
-           (if maybe-success
-               (success-val maybe-success)
-               (my-cond clause ...))
-           ))]
+         (let/cc return
+           (for (for-clause ...)
+             (define maybe-result
+               (my-cond looped-cond-clause ...
+                        [else failure-sym]))
+             (if (not (eq? maybe-result failure-sym))
+                 (return maybe-result)
+                 #f))
+           (my-cond clause ...)))]
       [(my-cond (for*/cond-clause ~! (for-clause ...) looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
-         (local [(struct success (val))
-                 (struct failure ())
-                 (define maybe-success
-                   (for*/or (for-clause ...)
-                     (let ([maybe-result
-                            (my-cond looped-cond-clause ...
-                                     [else (failure)])])
-                       (if (not (failure? maybe-result))
-                           (success maybe-result)
-                           #f))))]
-           (if maybe-success
-               (success-val maybe-success)
-               (my-cond clause ...))
-           ))]
+         (let/cc return
+           (for* (for-clause ...)
+             (define maybe-result
+               (my-cond looped-cond-clause ...
+                        [else failure-sym]))
+             (if (not (eq? maybe-result failure-sym))
+                 (return maybe-result)
+                 #f))
+           (my-cond clause ...)))]
       [(my-cond clause1
                 clause ...)
        (syntax/loc stx
@@ -154,5 +147,10 @@
                            [(<= 3 var) (define x var) x]
                            [(<= 2 var) (define x (number->string var)) x]))
                 "2")
+  (check-equal? (my-cond #:defs [(define b #f)]
+                         (for/cond-clause ([i (in-range 0 5)])
+                           [b i])
+                         [(not b) "this-thing"])
+                "this-thing")
   
   )

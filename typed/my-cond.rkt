@@ -11,19 +11,17 @@
                      racket/syntax
                      syntax/parse))
 
-(module+ test
-  (require typed/rackunit))
-
 (require (only-in my-cond/main for/cond-clause for*/cond-clause))
 
-(define-syntax define-gensym-type
+(define-syntax define-failure-sym
   (lambda (stx)
     (syntax-parse stx
-      [(define-gensym-type id:id)
-       (with-syntax ([sym (gensym (syntax-e #'id))])
+      [(define-failure-sym failure-sym:id)
+       (with-syntax ([sym (gensym 'failure)])
          #'(begin
-             (define-type id 'sym #:omit-define-syntaxes)
-             (define id : id 'sym)))])))
+             (define-type failure-sym 'sym #:omit-define-syntaxes)
+             (define failure-sym : failure-sym 'sym)))])))
+(define-failure-sym failure-sym)
 
 (define-syntax my-cond
   (lambda (stx)
@@ -42,68 +40,32 @@
                   (for-clause ...) looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
-         (local [(define-gensym-type success-sym)
-                 (define-gensym-type failure-sym)
-                 (define-type Success (Pairof success-sym type))
-                 (define-type Failure failure-sym)
-                 (define (success? val)
-                   (if (pair? val)
-                       (eq? (car val) success-sym)
-                       #f))
-                 (define (failure? val)
-                   (eq? val failure-sym))
-                 (: success : [type -> Success])
-                 (define (success val)
-                   (cons success-sym val))
-                 (: success-val : [Success -> type])
-                 (define (success-val s)
-                   (cdr s))
-                 (define failure failure-sym)
-                 (define maybe-success
-                   (for/or : (U Success #f) (for-clause ...)
-                     (let ([maybe-result : (U type Failure)
-                                         (my-cond looped-cond-clause ...
-                                                  [else failure])])
-                       (if (not (failure? maybe-result))
-                           (success maybe-result)
-                           #f))))]
-           (if maybe-success
-               (success-val maybe-success)
-               (my-cond clause ...))
-           ))]
+         (call/cc
+          (lambda ([return : (type -> Nothing)])
+            (for (for-clause ...)
+              (: maybe-result : (U type failure-sym))
+              (define maybe-result
+                (my-cond looped-cond-clause ...
+                         [else failure-sym]))
+              (if (not (eq? maybe-result failure-sym))
+                  (return (ann maybe-result type))
+                  #f))
+            (my-cond clause ...))))]
       [(my-cond (for*/cond-clause ~! (~optional (~seq : type) #:defaults ([type #'Any]))
                   (for-clause ...) looped-cond-clause ...)
                 clause ...)
        (syntax/loc stx
-         (local [(define-gensym-type success-sym)
-                 (define-gensym-type failure-sym)
-                 (define-type Success (Pairof success-sym type))
-                 (define-type Failure failure-sym)
-                 (define (success? val)
-                   (if (pair? val)
-                       (eq? (car val) success-sym)
-                       #f))
-                 (define (failure? val)
-                   (eq? val failure-sym))
-                 (: success : [type -> Success])
-                 (define (success val)
-                   (cons success-sym val))
-                 (: success-val : [Success -> type])
-                 (define (success-val s)
-                   (cdr s))
-                 (define failure failure-sym)
-                 (define maybe-success
-                   (for*/or : (U Success #f) (for-clause ...)
-                     (let ([maybe-result : (U type Failure)
-                                         (my-cond looped-cond-clause ...
-                                                  [else failure])])
-                       (if (not (failure? maybe-result))
-                           (success maybe-result)
-                           #f))))]
-           (if maybe-success
-               (success-val maybe-success)
-               (my-cond clause ...))
-           ))]
+         (call/cc
+          (lambda ([return : (type -> Nothing)])
+            (for* (for-clause ...)
+              (: maybe-result : (U type failure-sym))
+              (define maybe-result
+                (my-cond looped-cond-clause ...
+                         [else failure-sym]))
+              (if (not (eq? maybe-result failure-sym))
+                  (return (ann maybe-result type))
+                  #f))
+            (my-cond clause ...))))]
       [(my-cond clause1
                 clause ...)
        (syntax/loc stx
@@ -153,7 +115,9 @@
                 (cond/local clause ...)])]
       )))
 
-(module+ test
+(module* test typed/racket/base
+  (require (submod "..")
+           typed/rackunit)
   (check-equal? (my-cond) (cond))
   (let ([test-sym (gensym 'test-sym)])
     (check-equal? (my-cond [#true test-sym]) test-sym)
@@ -190,5 +154,10 @@
                            [(<= 3 var) (define x var) x]
                            [(<= 2 var) (define x (number->string var)) x]))
                 "2")
+  (check-equal? (my-cond #:defs [(define b : Boolean #f)]
+                         (for/cond-clause ([i (in-range 0 5)])
+                           [b i])
+                         [(not b) "this-thing"])
+                "this-thing")
   
   )
