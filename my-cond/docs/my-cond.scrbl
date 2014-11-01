@@ -2,7 +2,7 @@
 
 @(require scribble/eval)
 
-@(require (for-label racket/base
+@(require (for-label racket
                      my-cond))
 
 @title[#:tag "my-cond.scrbl"]{my-cond}
