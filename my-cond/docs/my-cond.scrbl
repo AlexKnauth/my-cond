@@ -77,7 +77,22 @@ these are defined as @racket[cond-expander]s.
 
 @defproc[(cond-expander [proc (syntax? . -> . syntax)]) cond-expander?]{
 returns a cond-expander that uses @racket[proc] to transform the @racket[my-cond] form.
-}
+
+@examples[
+  (require my-cond racket/match (for-syntax racket/base))
+  (define-syntax $m
+    (cond-expander
+     (syntax-rules ()
+       [(my-cond [$m val pat body ...] clause ...)
+        (match val
+          [pat body ...]
+          [_ (my-cond clause ...)])])))
+  (define x '(1 2 3))
+  (my-cond [$m x (list a b c) (+ a b c)]
+           [else #f])
+  (my-cond [$m 5 (list a b c) (+ a b c)]
+           [else #f])
+]}
 
 @defthing[prop:cond-expander (struct-type-property/c (-> cond-expander? (-> syntax? syntax?)))]{
 a struct-type property for @racket[cond-expander]s.
