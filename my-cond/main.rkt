@@ -4,31 +4,86 @@
          for/cond-clause
          for*/cond-clause
          )
+(require (for-syntax racket/base racket/contract/base))
+(begin-for-syntax
+  (provide (contract-out
+            [prop:cond-expander
+             (struct-type-property/c [cond-expander? . -> . (syntax? . -> . syntax?)])]
+            [cond-expander [(syntax? . -> . syntax?) . -> . cond-expander?]]
+            [cond-expander? [any/c . -> . boolean?]]
+            [syntax-local-cond-introduce [syntax? . -> . syntax?]]
+            )))
 
 (require racket/local
          (for-syntax racket/base
                      racket/local
-                     syntax/parse))
+                     syntax/parse
+                     "cond-expander-prop.rkt"
+                     "cond-expander.rkt"
+                     ))
 
 (module+ test
   (require rackunit))
 
-(define-syntax for/cond-clause
-  (lambda (stx)
-    (raise-syntax-error #f "must be used as a cond clause of a my-cond form" stx)))
-
-(define-syntax for*/cond-clause
-  (lambda (stx)
-    (raise-syntax-error #f "must be used as a cond clause of a my-cond form" stx)))
-
 (define failure-sym
   (gensym 'failure))
 
+(define-syntax for/cond-clause
+  (cond-expander
+   (lambda (stx)
+     (syntax-parse stx #:literals (for/cond-clause)
+       [(my-cond (for/cond-clause ~! (for-clause ...) looped-cond-clause ...)
+                 clause ...)
+        (syntax/loc stx
+          (let/cc return
+            (for (for-clause ...)
+              (define maybe-result
+                (my-cond looped-cond-clause ...
+                         [else failure-sym]))
+              (if (not (eq? maybe-result failure-sym))
+                  (return maybe-result)
+                  #f))
+            (my-cond clause ...)))]))))
+
+(define-syntax for*/cond-clause
+  (cond-expander
+   (lambda (stx)
+     (syntax-parse stx #:literals (for*/cond-clause)
+       [(my-cond (for*/cond-clause ~! (for-clause ...) looped-cond-clause ...)
+                 clause ...)
+        (syntax/loc stx
+          (let/cc return
+            (for* (for-clause ...)
+              (define maybe-result
+                (my-cond looped-cond-clause ...
+                         [else failure-sym]))
+              (if (not (eq? maybe-result failure-sym))
+                  (return maybe-result)
+                  #f))
+            (my-cond clause ...)))]))))
+
+(begin-for-syntax
+  (define-syntax-class cond-exp
+    [pattern id:id
+             #:attr exp (syntax-local-value #'id (λ () #f))
+             #:when (cond-expander? (attribute exp))
+             #:attr proc (cond-expander-proc (attribute exp))]))
+
 (define-syntax my-cond
   (lambda (stx)
-    (syntax-parse stx #:literals (for/cond-clause for*/cond-clause else)
+    (syntax-parse stx #:literals (else)
       [(my-cond)
        (syntax/loc stx (cond))]
+      [(my-cond [id:cond-exp . stuff] clause ...)
+       (let* ([proc (attribute id.proc)]
+              [intro (make-syntax-introducer)]
+              [form (intro (syntax-local-introduce stx))]
+              [new-form
+               (parameterize ([current-cond-introducer intro])
+                 (proc form))])
+         (syntax-property
+          (syntax-local-introduce (intro new-form))
+          'disappeared-use (list (syntax-local-introduce #'id))))]
       [(my-cond [else ~! body:expr ...+])
        (syntax/loc stx (cond [else body ...]))]
       [(my-cond #:defs ~! [def ...] clause ...)
@@ -37,30 +92,6 @@
        (syntax/loc stx (let ([var val] ...) (my-cond clause ...)))]
       [(my-cond #:begin [expr:expr ...] clause ...)
        (syntax/loc stx (begin expr ... (my-cond clause ...)))]
-      [(my-cond (for/cond-clause ~! (for-clause ...) looped-cond-clause ...)
-                clause ...)
-       (syntax/loc stx
-         (let/cc return
-           (for (for-clause ...)
-             (define maybe-result
-               (my-cond looped-cond-clause ...
-                        [else failure-sym]))
-             (if (not (eq? maybe-result failure-sym))
-                 (return maybe-result)
-                 #f))
-           (my-cond clause ...)))]
-      [(my-cond (for*/cond-clause ~! (for-clause ...) looped-cond-clause ...)
-                clause ...)
-       (syntax/loc stx
-         (let/cc return
-           (for* (for-clause ...)
-             (define maybe-result
-               (my-cond looped-cond-clause ...
-                        [else failure-sym]))
-             (if (not (eq? maybe-result failure-sym))
-                 (return maybe-result)
-                 #f))
-           (my-cond clause ...)))]
       [(my-cond clause1
                 clause ...)
        (syntax/loc stx

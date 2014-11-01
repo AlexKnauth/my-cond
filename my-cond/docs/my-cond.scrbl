@@ -5,17 +5,20 @@
 @(require (for-label racket/base
                      my-cond))
 
-@title{my-cond}
+@title[#:tag "my-cond.scrbl"]{my-cond}
 
 @defmodule[my-cond]
 
 source code: @url["https://github.com/AlexKnauth/my-cond"]
+
+@section[#:tag "my-cond.my-cond"]{my-cond}
 
 @defform[#:literals (else => for/cond-clause for*/cond-clause)
          (my-cond my-cond-clause ...)
          #:grammar ([my-cond-clause normal-cond-clause
                                     for/cond-clause-form
                                     for*/cond-clause-form
+                                    [cond-expander-id stuff ...]
                                     (code:line #:defs [def ...])
                                     (code:line #:let ([var val] ...))
                                     (code:line #:begin [def-or-expr ...])
@@ -33,7 +36,7 @@ source code: @url["https://github.com/AlexKnauth/my-cond"]
                                 (code:line #:break guard-expr)
                                 (code:line #:final guard-expr)])]{
 like @racket[cond], but with the ability to use things like @racket[for/cond-clause] to iterate
-through cond-clauses like @racket[for] would.
+through cond-clauses like @racket[for] would.  It does this using @racket[cond-expander]s.
 
 @racket[my-cond] also allows easy internal definitions with things like @racket[#:defs [def ...]]
 and @racket[#:let ([var val] ...)].  
@@ -67,6 +70,25 @@ form, and cannot appear inside of a @racket[for/cond-clause] or @racket[for*/con
 
 @deftogether[[@defform[(for/cond-clause (for-clause ...) my-cond-clause ...)]
               @defform[(for*/cond-clause (for-clause ...) my-cond-clause ...)]]]{
-these can only be used inside a @racket[my-cond] form, and they raise a syntax error when used outside
-of a @racket[my-cond] form.  
+these are defined as @racket[cond-expander]s.
 }
+
+@section{cond-expanders}
+
+@defproc[(cond-expander [proc (syntax? . -> . syntax)]) cond-expander?]{
+returns a cond-expander that uses @racket[proc] to transform the @racket[my-cond] form.
+}
+
+@defthing[prop:cond-expander (struct-type-property/c (-> cond-expander? (-> syntax? syntax?)))]{
+a struct-type property for @racket[cond-expander]s.
+}
+
+@defproc[(cond-expander? [v any/c]) boolean?]{
+returns @racket[#t] if @racket[v] is a cond-expander created by @racket[cond-expander] or
+@racket[prop:cond-expander], returns @racket[#f] otherwise.
+}
+
+@defproc[(syntax-local-cond-introduce [stx syntax?]) syntax?]{
+like @racket[syntax-local-introduce], but for @racket[cond-expander]s.
+}
+
