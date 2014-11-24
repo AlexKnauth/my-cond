@@ -1,5 +1,10 @@
 #lang racket/base
-(provide (all-defined-out))
+(provide prop:cond-expander
+         cond-expander?
+         cond-expander-proc
+         current-cond-introducer
+         syntax-local-cond-introduce
+         )
 
 (define-values (prop:cond-expander cond-expander? get-proc-getter)
   (make-struct-type-property 'cond-expander))
