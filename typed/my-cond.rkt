@@ -18,10 +18,10 @@
     (check-equal? (my-cond [#true test-sym]) test-sym)
     (check-equal? (my-cond [else test-sym]) test-sym)
     
-    (check-equal? (my-cond #:defs [(define b #t) (define x test-sym)]
+    (check-equal? (my-cond #:defs [(define b : Boolean #t) (define x test-sym)]
                            [b x])
                   test-sym)
-    (check-equal? (my-cond #:let ([b #t] [x test-sym])
+    (check-equal? (my-cond #:let ([b #t] [x : Symbol test-sym])
                            [b x])
                   test-sym)
     
@@ -37,11 +37,11 @@
                   test-sym)
     )
   
-  (check-equal? (my-cond (for/cond-clause ([var (in-range 0 5)])
+  (check-equal? (my-cond (for/cond-clause ([var (in-range 0 5)]) : (U Integer String)
                            [(<= 3 var) var]
                            [(<= 2 var) (number->string var)]))
                 "2")
-  (check-equal? (my-cond (for/cond-clause ([var (in-range 0 5)])
+  (check-equal? (my-cond (for/cond-clause : (U Integer String) ([var (in-range 0 5)])
                            [(<= 3 var) (define x var) x]
                            [(<= 2 var) (define x (number->string var)) x]))
                 "2")
