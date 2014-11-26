@@ -6,8 +6,7 @@
          for*/cond-clause
          )
 
-(require "../my-cond/my-cond.rkt"
-         "my-cond/for-cond-clause.rkt"
+(require "../my-cond/main.rkt"
          )
 
 (module* test typed/racket/base

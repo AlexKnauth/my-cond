@@ -5,43 +5,25 @@
          )
 
 (require (for-syntax racket/base
-                     syntax/parse
+                     (only-in typed/untyped-utils syntax-local-typed-context?)
                      "cond-expander.rkt"
+                     "parse-for-cond-clause.rkt"
+                     (prefix-in typed: "../typed/my-cond/parse-for-cond-clause.rkt")
                      ))
-
-(define failure-sym
-  (gensym 'failure))
 
 (define-syntax for/cond-clause
   (cond-expander
    (lambda (stx)
-     (syntax-parse stx #:literals (for/cond-clause)
-       [(my-cond (for/cond-clause ~! (for-clause ...) looped-cond-clause ...)
-                 clause ...)
-        (syntax/loc stx
-          (let/cc return
-            (for (for-clause ...)
-              (define maybe-result
-                (my-cond looped-cond-clause ...
-                         [else failure-sym]))
-              (if (not (eq? maybe-result failure-sym))
-                  (return maybe-result)
-                  #f))
-            (my-cond clause ...)))]))))
+     (cond [(syntax-local-typed-context?)
+            (typed:parse-for/cond-clause stx)]
+           [else
+            (parse-for/cond-clause stx)]))))
 
 (define-syntax for*/cond-clause
   (cond-expander
    (lambda (stx)
-     (syntax-parse stx #:literals (for*/cond-clause)
-       [(my-cond (for*/cond-clause ~! (for-clause ...) looped-cond-clause ...)
-                 clause ...)
-        (syntax/loc stx
-          (let/cc return
-            (for* (for-clause ...)
-              (define maybe-result
-                (my-cond looped-cond-clause ...
-                         [else failure-sym]))
-              (if (not (eq? maybe-result failure-sym))
-                  (return maybe-result)
-                  #f))
-            (my-cond clause ...)))]))))
+     (cond [(syntax-local-typed-context?)
+            (typed:parse-for*/cond-clause stx)]
+           [else
+            (parse-for*/cond-clause stx)]))))
+
