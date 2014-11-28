@@ -26,9 +26,16 @@
     (check-equal? (my-cond #:defs [(define b #t) (define x test-sym)]
                            [b x])
                   test-sym)
-    (check-equal? (my-cond #:let ([b #t] [x test-sym])
+    (check-equal? (my-cond #:let ([b 5])
+                           #:let ([b #t] [x (if (= b 5) test-sym #f)])
                            [b x])
                   test-sym)
+    (check-equal? (my-cond #:let* ([b 5] [b (if b #t #f)])
+                           [else b])
+                  #t)
+    (check-equal? (my-cond #:letrec ([f (λ () g)] [g (λ () f)])
+                           [else #t])
+                  #t)
     
     (check-equal? (my-cond (for/cond-clause ()
                              [#true test-sym]))

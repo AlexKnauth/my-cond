@@ -1,9 +1,14 @@
 #lang typed/racket/base
 
 (provide my-cond
-         cond/local-def
+         my-cond/defs
+         my-cond/let
+         my-cond/let*
+         my-cond/letrec
+         my-cond/begin
          for/cond-clause
          for*/cond-clause
+         cond/local-def
          )
 
 (require "../my-cond/main.rkt"
@@ -20,9 +25,17 @@
     (check-equal? (my-cond #:defs [(define b : Boolean #t) (define x test-sym)]
                            [b x])
                   test-sym)
-    (check-equal? (my-cond #:let ([b #t] [x : Symbol test-sym])
+    (check-equal? (my-cond #:let ([b : 5 5])
+                           #:let ([b #t] [x : Symbol (if (eq? b 5) test-sym '|#f|)])
                            [b x])
                   test-sym)
+    (check-equal? (my-cond #:let* ([b 5] [b (if b #t #f)])
+                           [else b])
+                  #t)
+    (check-equal? (my-cond #:letrec ([f : (-> False) (λ () g #f)] [g : (-> False) (λ () f #f)])
+                           [else #t])
+                  #t)
+    
     
     (check-equal? (my-cond (for/cond-clause ()
                              [#true test-sym]))
