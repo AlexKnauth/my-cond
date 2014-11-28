@@ -2,10 +2,14 @@
 
 (provide my-cond
          my-cond/defs
+         my-cond/local
+         my-cond/begin
          my-cond/let
          my-cond/let*
          my-cond/letrec
-         my-cond/begin
+         my-cond/letrec-syntaxes+values
+         my-cond/parameterize
+         my-cond/with-handlers
          for/cond-clause
          for*/cond-clause
          cond/local-def
