@@ -53,6 +53,16 @@
      (syntax-property
       (syntax-local-introduce (intro new-form))
       'disappeared-use (list (syntax-local-introduce #'id))))]
+  [(my-cond id:cond-exp . stuff)
+   (let* ([proc (attribute id.proc)]
+          [intro (make-syntax-introducer)]
+          [form (intro (syntax-local-introduce stx))]
+          [new-form
+           (parameterize ([current-cond-introducer intro])
+             (proc form))])
+     (syntax-property
+      (syntax-local-introduce (intro new-form))
+      'disappeared-use (list (syntax-local-introduce #'id))))]
   [(my-cond [else ~! body:expr ...+])
    (syntax/loc stx (cond [else body ...]))]
   [(my-cond kw:kw . stuff)

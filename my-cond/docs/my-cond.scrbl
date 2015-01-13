@@ -18,7 +18,8 @@ source code: @url["https://github.com/AlexKnauth/my-cond"]
          #:grammar ([my-cond-clause normal-cond-clause
                                     for/cond-clause-form
                                     for*/cond-clause-form
-                                    [cond-expander-id stuff ...]
+                                    (cond-expander-id stuff ...)
+                                    (code:line cond-expander-id stuff ...)
                                     (code:line #:defs [def ...])
                                     (code:line #:let ([var val] ...))
                                     (code:line #:begin [def-or-expr ...])
