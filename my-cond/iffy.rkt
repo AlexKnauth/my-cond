@@ -5,7 +5,6 @@ provide my-cond if else-if else
 require syntax/parse/define
         only-in racket/base [if rkt:if]
         "main.rkt"
-        for-syntax postfix-dot-notation
 module+ test
   require rackunit
 
@@ -15,7 +14,7 @@ begin-for-syntax
     struct-field-index proc
     #:property prop:cond-expander
     λ (this)
-      this.proc+condexp-condexp
+      proc+condexp-condexp this
 
 define-syntax if
   proc+condexp
