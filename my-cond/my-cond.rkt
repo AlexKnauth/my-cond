@@ -43,7 +43,7 @@
 (define-syntax-parser my-cond #:stx stx #:literals (else)
   [(my-cond)
    (syntax/loc stx (cond))]
-  [(my-cond [id:cond-exp . stuff] clause ...)
+  [(my-cond [id:cond-exp . stuff] . clauses)
    (let* ([proc (attribute id.proc)]
           [intro (make-syntax-introducer)]
           [form (intro (syntax-local-introduce stx))]
@@ -69,57 +69,57 @@
    #:with my-cond/kw-id (format-id #'kw "my-cond/~a" (keyword->string (syntax-e #'kw))
                                    #:source #'kw)
    (syntax/loc stx (my-cond/kw-id . stuff))]
-  [(my-cond clause1
-            clause ...)
-   (syntax/loc stx
+  [(my-cond clause1 . clauses)
+   (quasisyntax/loc stx
      (cond clause1
            [else
-            (my-cond clause ...)]))]
+            #,(syntax/loc stx
+                (my-cond . clauses))]))]
   )
 
 (define-syntax-parser my-cond/defs #:stx stx
-  [(my-cond/defs [def ...] clause ...)
-   (syntax/loc stx (local [def ...] (my-cond clause ...)))])
+  [(my-cond/defs [def ...] . clauses)
+   (syntax/loc stx (local [def ...] (my-cond . clauses)))])
 
 (define-syntax my-cond/local (make-rename-transformer #'my-cond/defs))
 
 (define-syntax-parser my-cond/begin #:stx stx
-  [(my-cond/begin [expr:expr ...] clause ...)
-   (syntax/loc stx (begin expr ... (my-cond clause ...)))])
+  [(my-cond/begin [expr:expr ...] . clauses)
+   (syntax/loc stx (begin expr ... (my-cond . clauses)))])
 
 (define-syntax-parser my-cond/let #:stx stx
-  [(my-cond/let (binding ...) clause ...)
+  [(my-cond/let (binding ...) . clauses)
    #:with let-id (t/u #'let)
-   (syntax/loc stx (let-id (binding ...) (my-cond clause ...)))])
+   (syntax/loc stx (let-id (binding ...) (my-cond . clauses)))])
 
 (define-syntax-parser my-cond/let* #:stx stx
-  [(my-cond/let* (binding ...) clause ...)
+  [(my-cond/let* (binding ...) . clauses)
    #:with let*-id (t/u #'let*)
-   (syntax/loc stx (let*-id (binding ...) (my-cond clause ...)))])
+   (syntax/loc stx (let*-id (binding ...) (my-cond . clauses)))])
 
 (define-syntax-parser my-cond/letrec #:stx stx
-  [(my-cond/letrec (binding ...) clause ...)
+  [(my-cond/letrec (binding ...) . clauses)
    #:with letrec-id (t/u #'letrec)
-   (syntax/loc stx (letrec-id (binding ...) (my-cond clause ...)))])
+   (syntax/loc stx (letrec-id (binding ...) (my-cond . clauses)))])
 
 (define-syntax-parser my-cond/letrec-syntaxes+values #:stx stx
   [(my-cond/letrec-syntaxes+values (trans-binding  ...) (binding ...)
-                                   clause ...)
+                                   . clauses)
    #:with letrec-syntaxes+values-id (t/u #'letrec-syntaxes+values)
    #'(letrec-syntaxes+values-id (trans-binding ...) (binding ...)
-                                (my-cond clause ...))])
+                                (my-cond . clauses))])
 
 (define-syntax-parser my-cond/parameterize #:stx stx
-  [(my-cond/parameterize ([parameter val] ...) clause ...)
+  [(my-cond/parameterize ([parameter val] ...) . clauses)
    #:with parameterize-id (t/u #'parameterize)
    #'(parameterize-id ([parameter val] ...)
-                      (my-cond clause ...))])
+                      (my-cond . clauses))])
 
 (define-syntax-parser my-cond/with-handlers #:stx stx
-  [(my-cond/with-handlers ([pred handler] ...) clause ...)
+  [(my-cond/with-handlers ([pred handler] ...) . clauses)
    #:with with-handlers-id (t/u #'with-handlers)
    #'(with-handlers-id ([pred handler] ...)
-                       (my-cond clause ...))])
+                       (my-cond . clauses))])
 
 (define-syntax-parser cond/local-def #:stx stx
   [(cond/local) #'(cond)]
