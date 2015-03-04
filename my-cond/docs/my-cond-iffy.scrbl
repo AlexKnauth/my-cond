@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(require (for-label my-cond my-cond/iffy (rename-in racket/base [if rkt:if])))
+@(require (for-label my-cond my-cond/iffy (rename-in racket/base [if rkt:if] [define rkt:define])))
 
 @title{my-cond/iffy with sweet-exp}
 
