@@ -1,9 +1,10 @@
 #lang sweet-exp racket
 
-provide my-cond if else-if else
+provide if else-if else define
+        all-from-out "main.rkt"
 
 require syntax/parse/define
-        only-in racket/base [if rkt:if]
+        only-in racket/base [if rkt:if] [define rkt:define]
         "main.rkt"
 module+ test
   require rackunit
@@ -31,7 +32,17 @@ define-syntax else-if
       (~and stx (my-cond [else-if condition:expr body:expr ...+] . stuff))
         syntax/loc #'stx (my-cond [condition body ...] . stuff)
 
+define-syntax define
+  proc+condexp
+    syntax-parser
+      (~and stx (define stuff:expr ...+))
+        syntax/loc #'stx (rkt:define stuff ...)
+    syntax-parser
+      (~and stx (my-cond (~and def (define :expr ...+)) . stuff))
+        syntax/loc #'stx (my-cond #:defs [def] . stuff)
+
 module+ test
+  define test-sym (gensym 'test-sym)
   check-equal?
     if {2 < 1} 1 2
     2
@@ -74,3 +85,18 @@ module+ test
           {x + 1}
         f 2
     3
+  check-equal?
+    my-cond
+      #:defs
+        define b #t
+        define x test-sym
+      if b x
+    test-sym
+  check-equal?
+    my-cond
+      for/cond-clause ([var (in-range 0 5)])
+        if {3 <= var}
+          var
+        else-if {2 <= var}
+          number->string(var)
+    "2"
