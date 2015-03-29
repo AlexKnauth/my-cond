@@ -6,16 +6,9 @@ provide if else-if else define
 require syntax/parse/define
         only-in racket/base [if rkt:if] [define rkt:define]
         "main.rkt"
+        for-syntax "proc+condexp.rkt"
 module+ test
   require rackunit
-
-begin-for-syntax
-  struct proc+condexp (proc condexp) #:transparent
-    #:property prop:procedure
-    struct-field-index proc
-    #:property prop:cond-expander
-    λ (this)
-      proc+condexp-condexp this
 
 define-syntax if
   proc+condexp
