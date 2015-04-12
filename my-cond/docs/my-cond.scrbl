@@ -20,6 +20,7 @@ source code: @url["https://github.com/AlexKnauth/my-cond"]
                                     for*/cond-clause-form
                                     (cond-expander-id stuff ...)
                                     (code:line cond-expander-id stuff ...)
+                                    (code:line #:def def)
                                     (code:line #:defs [def ...])
                                     (code:line #:let ([var val] ...))
                                     (code:line #:begin [def-or-expr ...])

@@ -3,6 +3,7 @@
 (provide my-cond
          my-cond/defs
          my-cond/local
+         my-cond/def
          my-cond/begin
          my-cond/let
          my-cond/let*
@@ -82,6 +83,10 @@
    (syntax/loc stx (local [def ...] (my-cond . clauses)))])
 
 (define-syntax my-cond/local (make-rename-transformer #'my-cond/defs))
+
+(define-syntax-parser my-cond/def #:stx stx
+  [(my-cond/def def . clauses)
+   (syntax/loc stx (local [def] (my-cond . clauses)))])
 
 (define-syntax-parser my-cond/begin #:stx stx
   [(my-cond/begin [expr:expr ...] . clauses)
