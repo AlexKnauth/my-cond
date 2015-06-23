@@ -15,7 +15,6 @@
          )
 
 (require racket/local
-         syntax/parse/define
          (prefix-in tr: typed/racket/base)
          "define-syntax-parser.rkt"
          (for-syntax racket/base
