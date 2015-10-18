@@ -1,9 +1,7 @@
-my-cond
+my-cond [![Build Status](https://travis-ci.org/AlexKnauth/my-cond.png?branch=master)](https://travis-ci.org/AlexKnauth/my-cond)
 =======
 
 a version of cond that supports a for/cond-clause form, allowing it to iterate though conditions
-
-[![Build Status](https://travis-ci.org/AlexKnauth/my-cond.png?branch=master)](https://travis-ci.org/AlexKnauth/my-cond)
 
 documentation: http://pkg-build.racket-lang.org/doc/my-cond/index.html
 
