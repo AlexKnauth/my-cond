@@ -25,12 +25,15 @@
            (call/cc
             (lambda ([return : (type -> Nothing)])
               (for (for-clause ...)
-                (: maybe-result : (U type Failure-Sym))
+                (: maybe-result : (Maybe type))
                 (define maybe-result
-                  (my-cond looped-cond-clause ...
-                           [else failure-sym]))
-                (if (not (failure-sym? maybe-result))
-                    (return (ann maybe-result type))
+                  (call/cc
+                   (lambda ([mreturn : ((Maybe type) -> Nothing)])
+                     (some
+                      (my-cond looped-cond-clause ...
+                               [else (mreturn none)])))))
+                (if (some? maybe-result)
+                    (return (ann (some-value maybe-result) type))
                     #f))
               (my-cond clause ...))))]))
     parse-for/cond-clause))
